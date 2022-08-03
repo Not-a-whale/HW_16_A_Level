@@ -66,7 +66,46 @@ namespace Program
                 Employee employee2 = new Employee() { FirstName = "John", LastName = "Green", HiredDate = new DateTime(2018, 3, 21), OfficeId = 1, TitleId = 3 };
                 db.Employees.Add(employee2);
                 db.SaveChanges();
+                Console.WriteLine("\n");
 
+                // 4) Deleting some guy
+                Employee toBeRemoved = db.Employees.Where(e => e.EmployeeId == 1006).First();
+                Console.WriteLine($"Firing {toBeRemoved.FirstName}");
+                db.Employees.Remove(toBeRemoved);
+                Console.WriteLine($"{toBeRemoved.FirstName} has been fired");
+                Console.WriteLine("\n");
+
+                // 5) Group by roles. Return roles that do not have a letter 'a' in their names
+
+                var listOfAllTheRolesForAllEmployees = db.Titles.Join(db.Employees,
+                    e => e.TitleId,
+                    t => t.TitleId,
+                    (t, employees) => new
+                    {
+                        Title = t.Name
+                    }).Distinct().ToList();
+
+                var rolesWithoutAInTitle = listOfAllTheRolesForAllEmployees.FindAll(t => !t.Title.Contains('a'));
+                foreach(var role in rolesWithoutAInTitle)
+                {
+                    Console.WriteLine(role.Title);
+                }
+                Console.WriteLine("\n");
+
+                // 6) Connected entities query
+                var titlesAndEmployees = db.Employees.Join(db.Titles,
+                    e => e.TitleId,
+                    t => t.TitleId,
+                    (e, t) => new
+                    {
+                        Name = e.FirstName,
+                        Title = t.Name
+                    }).ToList();
+
+                foreach(var employee in titlesAndEmployees)
+                {
+                    Console.WriteLine($"The guy named {employee.Name} is a {employee.Title}");
+                }
 
             }
         }
